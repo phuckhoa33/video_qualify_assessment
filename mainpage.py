@@ -7,16 +7,19 @@ from tkinter import filedialog as fd
 from contentAssessment.video_to_text import from_video_to_file
 from contentAssessment.wordsAssessment import validate_swear_words
 from imageClassfication.getImageFromVideo import getImages
+from solveFIle import convert_standard_text, insert_file, solve_with_qualify_file
 import threading
 import imageio
 from PIL import Image, ImageTk
 from tkvideo import tkvideo
+import os
 
 
 # You can also use a pandas dataframe for pokemon_info.
 # you can convert the dataframe using df.to_numpy.tolist()
-pokemon_info = [['Bulbasaur', 'Grass', '318'], ['Ivysaur', 'Grass', '405'], ['Venusaur', 'Grass', '525'], ['Charmander', 'Fire', '309'], ['Charmeleon', 'Fire', '405'], ['Charizard', 'Fire', '534'], ['Squirtle', 'Water', '314'], ['Wartortle', 'Water', '405'], ['Blastoise', 'Water', '530'], ['Caterpie', 'Bug', '195'], ['Metapod', 'Bug', '205'], ['Butterfree', 'Bug', '395'], ['Weedle', 'Bug', '195'], ['Kakuna', 'Bug', '205'], ['Beedrill', 'Bug', '395'], ['Pidgey', 'Normal', '251'], ['Pidgeotto', 'Normal', '349'], ['Pidgeot', 'Normal', '479'], ['Rattata', 'Normal', '253'], ['Raticate', 'Normal', '413'], ['Spearow', 'Normal', '262'], ['Fearow', 'Normal', '442'], ['Ekans', 'Poison', '288'], ['Arbok', 'Poison', '448'], ['Pikachu', 'Electric', '320'], ['Raichu', 'Electric', '485'], ['Sandshrew', 'Ground', '300'], ['Sandslash', 'Ground', '450'], ['Nidoran?', 'Poison', '275'], ['Nidorina', 'Poison', '365'], ['Nidoqueen', 'Poison', '505'], ['Nidoran?', 'Poison', '273'], ['Nidorino', 'Poison', '365'], ['Nidoking', 'Poison', '505'], ['Clefairy', 'Fairy', '323'], ['Clefable', 'Fairy', '483'], ['Vulpix', 'Fire', '299'], ['Ninetales', 'Fire', '505'], ['Jigglypuff', 'Normal', '270'], ['Wigglytuff', 'Normal', '435'], ['Zubat', 'Poison', '245'], ['Golbat', 'Poison', '455'], ['Oddish', 'Grass', '320'], ['Gloom', 'Grass', '395'], ['Vileplume', 'Grass', '490'], ['Paras', 'Bug', '285'], ['Parasect', 'Bug', '405'], ['Venonat', 'Bug', '305'], ['Venomoth', 'Bug', '450'], ['Diglett', 'Ground', '265'], ['Dugtrio', 'Ground', '425'], ['Meowth', 'Normal', '290'], ['Persian', 'Normal', '440'], ['Psyduck', 'Water', '320'], ['Golduck', 'Water', '500'], ['Mankey', 'Fighting', '305'], ['Primeape', 'Fighting', '455'], ['Growlithe', 'Fire', '350'], ['Arcanine', 'Fire', '555'], ['Poliwag', 'Water', '300'], ['Poliwhirl', 'Water', '385'], ['Poliwrath', 'Water', '510'], ['Abra', 'Psychic', '310'], ['Kadabra', 'Psychic', '400'], ['Alakazam', 'Psychic', '500'], ['Machop', 'Fighting', '305'], ['Machoke', 'Fighting', '405'], ['Machamp', 'Fighting', '505'], ['Bellsprout', 'Grass', '300'], ['Weepinbell', 'Grass', '390'], ['Victreebel', 'Grass', '490'], ['Tentacool', 'Water', '335'], ['Tentacruel', 'Water', '515'], ['Geodude', 'Rock', '300'], ['Graveler', 'Rock', '390'], ['Golem', 'Rock', '495'], ['Ponyta', 'Fire', '410'], ['Rapidash', 'Fire', '500'], ['Slowpoke', 'Water', '315'], ['Slowbro', 'Water', '490'], ['Magnemite', 'Electric', '325'], ['Magneton', 'Electric', '465'], ["Farfetch'd", 'Normal', '377'], ['Doduo', 'Normal', '310'], ['Dodrio', 'Normal', '470'], ['Seel', 'Water', '325'], ['Dewgong', 'Water', '475'], ['Grimer', 'Poison', '325'], ['Muk', 'Poison', '500'], ['Shellder', 'Water', '305'], ['Cloyster', 'Water', '525'], ['Gastly', 'Ghost', '310'], ['Haunter', 'Ghost', '405'], ['Gengar', 'Ghost', '500'], ['Onix', 'Rock', '385'], ['Drowzee', 'Psychic', '328'], ['Hypno', 'Psychic', '483'], ['Krabby', 'Water', '325'], ['Kingler', 'Water', '475'], ['Voltorb', 'Electric', '330'], ['Electrode', 'Electric', '490'], ['Exeggcute', 'Grass', '325'], ['Exeggutor', 'Grass', '530'], ['Cubone', 'Ground', '320'], ['Marowak', 'Ground', '425'], ['Hitmonlee', 'Fighting', '455'], ['Hitmonchan', 'Fighting', '455'], ['Lickitung', 'Normal', '385'], ['Koffing', 'Poison', '340'], ['Weezing', 'Poison', '490'], ['Rhyhorn', 'Ground', '345'], ['Rhydon', 'Ground', '485'], ['Chansey', 'Normal', '450'], ['Tangela', 'Grass', '435'], ['Kangaskhan', 'Normal', '490'], ['Horsea', 'Water', '295'], ['Seadra', 'Water', '440'], ['Goldeen', 'Water', '320'], ['Seaking', 'Water', '450'], ['Staryu', 'Water', '340'], ['Starmie', 'Water', '520'], ['Scyther', 'Bug', '500'], ['Jynx', 'Ice', '455'], ['Electabuzz', 'Electric', '490'], ['Magmar', 'Fire', '495'], ['Pinsir', 'Bug', '500'], ['Tauros', 'Normal', '490'], ['Magikarp', 'Water', '200'], ['Gyarados', 'Water', '540'], ['Lapras', 'Water', '535'], ['Ditto', 'Normal', '288'], ['Eevee', 'Normal', '325'], ['Vaporeon', 'Water', '525'], ['Jolteon', 'Electric', '525'], ['Flareon', 'Fire', '525'], ['Porygon', 'Normal', '395'], ['Omanyte', 'Rock', '355'], ['Omastar', 'Rock', '495'], ['Kabuto', 'Rock', '355'], ['Kabutops', 'Rock', '495'], ['Aerodactyl', 'Rock', '515'], ['Snorlax', 'Normal', '540'], ['Articuno', 'Ice', '580'], ['Zapdos', 'Electric', '580'], ['Moltres', 'Fire', '580'], ['Dratini', 'Dragon', '300'], ['Dragonair', 'Dragon', '420'], ['Dragonite', 'Dragon', '600'], ['Mewtwo', 'Psychic', '680'], ['Mew', 'Psychic', '600']]
+pokemon_info = solve_with_qualify_file()
 
+canable_assessment = False
 
 frame_styles = {"relief": "groove",
                 "bd": 3, "bg": "#BEB2A7",
@@ -84,10 +87,11 @@ class LoginPage(tk.Tk):
             # Checks the text file for a username/password combination.
             try:
                 D_account = read_file("account.csv")
+                global name_of_author
                 for i in range(0, len(D_account['fullname'])):
                     if D_account['fullname'][i] == username and D_account['password'][i] == password:
+                        name_of_author = D_account['fullname'][i]
                         return True
-                    
                 return False
             except FileNotFoundError:
                 print("You need to Register first or amend Line 71 to     if True:")
@@ -164,28 +168,28 @@ class MenuBar(tk.Menu):
         tk.Menu.__init__(self, parent)
 
         menu_file = tk.Menu(self, tearoff=0)
-        self.add_cascade(label="Menu1", menu=menu_file)
+        self.add_cascade(label="File", menu=menu_file)
         menu_file.add_command(label="All Widgets", command=lambda: parent.show_frame(Some_Widgets))
         menu_file.add_separator()
         menu_file.add_command(label="Exit Application", command=lambda: parent.Quit_application())
 
         menu_orders = tk.Menu(self, tearoff=0)
-        self.add_cascade(label="Menu2", menu=menu_orders)
+        # self.add_cascade(label="", menu=menu_orders)
 
         menu_pricing = tk.Menu(self, tearoff=0)
-        self.add_cascade(label="Menu3", menu=menu_pricing)
+        self.add_cascade(label="Analysis", menu=menu_pricing)
         menu_pricing.add_command(label="Page One", command=lambda: parent.show_frame(PageOne))
 
         menu_operations = tk.Menu(self, tearoff=0)
-        self.add_cascade(label="Menu4", menu=menu_operations)
-        menu_operations.add_command(label="Page Two", command=lambda: parent.show_frame(PageTwo))
+        self.add_cascade(label="Dashboard", menu=menu_operations)
+        menu_operations.add_command(label="", command=lambda: parent.show_frame(PageTwo))
         menu_positions = tk.Menu(menu_operations, tearoff=0)
-        menu_operations.add_cascade(label="Menu5", menu=menu_positions)
+        menu_operations.add_cascade(label="Empty", menu=menu_positions)
         menu_positions.add_command(label="Page Three", command=lambda: parent.show_frame(PageThree))
         menu_positions.add_command(label="Page Four", command=lambda: parent.show_frame(PageFour))
 
         menu_help = tk.Menu(self, tearoff=0)
-        self.add_cascade(label="Menu6", menu=menu_help)
+        self.add_cascade(label="About Us", menu=menu_help)
         menu_help.add_command(label="Open New Window", command=lambda: parent.OpenNewWindow())
 
 
@@ -242,13 +246,14 @@ class Some_Widgets(GUI):  # inherits from the GUI class
 
         frame2 = tk.LabelFrame(self, frame_styles, text="Check video quality")
         frame2.place(rely=0.05, relx=0.45, height=500, width=500)
-        open_file_button = ttk.Button(frame2, text='Choose video file', command=lambda: setting_for_video_position())
+        open_file_button = ttk.Button(frame2, text='Choose video file', command= lambda: choose_file())
         open_file_button.pack(side='left')
+        
        
 
         # This is a treeview.
         tv1 = ttk.Treeview(frame1)
-        column_list_account = ["Name", "Type", "Base Stat Total"]
+        column_list_account = ["Name", "Name Of Video", "Qualify"]
         tv1['columns'] = column_list_account
         tv1["show"] = "headings"  # removes empty column
         for column in column_list_account:
@@ -259,30 +264,55 @@ class Some_Widgets(GUI):  # inherits from the GUI class
         treescroll.configure(command=tv1.yview)
         tv1.configure(yscrollcommand=treescroll.set)
         treescroll.pack(side="right", fill="y")
-        
-        def setting_for_video_position():
-            ## Choose video 
-            filename = fd.askopenfilename()
+        informed_label = ttk.Label(frame2, text='',padding=2, background="red")
+        informed_label.pack()
+        all_content_label = ttk.Label(frame2, text='')
+        all_content_label.pack()
+        def choose_file():
+            try:
+                global filename
+                filename = fd.askopenfilename()
+                informed_label.configure(text=filename)
+                all_content_label.configure(text="You must wait a little bit before see results...")
+                assessment_thread = threading.Thread(target=assessment, args=())
+                assessment_thread.start()
+            except Exception:
+                return "This file is error"
+        def setting_for_video_position(filename):
+            pass
 
-            ## Display video 
-            videoplayer = TkinterVideo(master=frame2, scaled=True)
-            videoplayer.load(f"{filename}")
-            videoplayer.pack()
-            play_video_thread = threading.Thread(target=videoplayer.play, args=())
-            play_video_thread.start()
-            check_video_quality_thread = threading.Thread(target=checkVideoQuality, args=(filename))    
-            check_video_quality_thread.start()
+        def assessment():
+            global filename
+            setting_for_video_position(filename)
+            checkVideoQuality(filename)  
+        
         def read_and_assess_content(path_name):
-            informed_label = ttk.Label(frame2, text='')
-            informed_label.pack()
+            
             checkable = validate_swear_words(path_name)
+            qualify_of_video = None
             if checkable:
                 informed_label.configure(text="This video has good quality")
+                qualify_of_video = "Good quality"
             else:
                 informed_label.configure(text="This video has bad quality")
-        def Load_data():
+                qualify_of_video = "18+"
+
+            data = convert_standard_text()
+            all_content_label.configure(text=data)
+            global filename
+            global name_of_author
+            name_of_video = filename.split("/")[-1]
+            insert_file('qualify_of_video.csv', f"{name_of_author},{name_of_video},{qualify_of_video}\n")
+            global pokemon_info
+            pokemon_info = solve_with_qualify_file()
+            clear_all()
+            Load_data()
+        def Load_data(): 
             for row in pokemon_info:
                 tv1.insert("", "end", values=row)
+        def clear_all():
+            for item in tv1.get_children():
+                tv1.delete(item)
 
         def Refresh_data():
             # Deletes the data in the current treeview and reinserts it.
@@ -291,10 +321,7 @@ class Some_Widgets(GUI):  # inherits from the GUI class
 
         def checkVideoQuality(filename):
             from_video_to_file(filename)
-            # getImages(filename)
-            
             read_and_assess_content("contentAssessment/readContent/recognized.txt")
-
 
         Load_data()
 
@@ -311,9 +338,40 @@ class PageThree(GUI):
     def __init__(self, parent, controller):
         GUI.__init__(self, parent)
 
-        label1 = tk.Label(self.main_frame, font=("Verdana", 20), text="Page Three")
+        label1 = tk.Label(self.main_frame, font=("Verdana", 20), text="Change Informations")
         label1.pack(side="top")
+        title_styles = {"font": ("Trebuchet MS Bold", 16), "background": "blue"}
 
+        text_styles = {"font": ("Verdana", 14),
+                       "background": "blue",
+                       "foreground": "#E1FFFF"}
+        
+        username = tk.StringVar()
+        password = tk.StringVar()
+
+        frame_login = tk.Frame(self.main_frame, bg="blue", relief="groove", bd=2)  # this is the frame that holds all the login details and buttons
+        frame_login.place(rely=0.30, relx=0.17, height=130, width=400)
+        label_user = tk.Label(frame_login, text_styles, text="Username:")
+        label_user.grid(row=1, column=0)
+
+        label_pw = tk.Label(frame_login, text_styles, text="Password:")
+        label_pw.grid(row=2, column=0)
+
+        entry_user = ttk.Entry(frame_login, width=45, cursor="xterm", textvariable=username)
+        entry_user.grid(row=1, column=1)
+
+        entry_pw = ttk.Entry(frame_login, width=45, cursor="xterm", show="*", textvariable=password)
+        entry_pw.grid(row=2, column=1)
+
+        button = ttk.Button(frame_login, text="Save", command=lambda: changeProfile)
+        button.place(rely=0.70, relx=0.50)
+        def changeProfile():
+            data = read_file("account.csv")
+            for i in range(0, len(data['fullname'])):
+                if data['fullname'][i] == username.get():
+                    data['fullname'][i] = username.get()
+                    data['password'][i] = password.get()
+                    break
 
 class PageFour(GUI):
     def __init__(self, parent, controller):
@@ -342,14 +400,14 @@ class OpenNewWindow(tk.Tk):
         main_frame.pack(fill="both", expand="true")
         main_frame.grid_rowconfigure(0, weight=1)
         main_frame.grid_columnconfigure(0, weight=1)
-        self.title("Here is the Title of the Window")
+        self.title("Introduction about this project")
         self.geometry("500x500")
         self.resizable(0, 0)
 
-        frame1 = ttk.LabelFrame(main_frame, text="This is a ttk LabelFrame")
+        frame1 = ttk.LabelFrame(main_frame, text="In modern social, everyone always have a modern device. This can a laptop or the currently important device is smartphone. Development of smart phone has impacted many side both education and family. Currently, young boys and girls have easily appoarched. And a of all contents in smartphone is video. Video Platform has developed in Covid 19 stage. It have become a vital operation in each dinner or free time of childern. From it we have also detected many issues about video qualify.\nThis is many issues, I has had a idea about a video qualify assessment by a tkinter app")
         frame1.pack(expand=True, fill="both")
 
-        label1 = tk.Label(frame1, font=("Verdana", 20), text="OpenNewWindow Page")
+        label1 = tk.Label(frame1, font=("Verdana", 20), text="This application will be used to improve information interference situation. If you have any wonder about this application, you can access into my facebook and ask me via message(https://www.facebook.com/nguyenkhoa.phuc.71). My social media so that you can access:\nFacebook: https://www.facebook.com/nguyenkhoa.phuc.71\nGithub\nThe first github: https://github.com/33phuckhoa\nThe second github: https://github.com/phuckhoa33\nLinkedIn: https://www.linkedin.com/in/minh-phuc-774110229/")
         label1.pack(side="top")
 
 

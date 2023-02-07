@@ -1,6 +1,29 @@
-from better_profanity import profanity    #import better_profanity module
-text = "Hello,how are you?"               #Enter text to check
-if(profanity.contains_profanity(text)):   #to check if the input text has any swear words.
-    print("The text contains profane words")
-else:
-    print("No text does not contain profane words")
+# from tkinter import *
+# import time
+
+# sc = Tk()
+# sc.geometry("300x300")
+
+# run = False
+
+# def clickme():
+#     global run
+#     if run == False:
+#         run = True
+#         ham()
+#     else:
+#         run = False
+
+# bt = Button(sc,text="click me",command=clickme)
+# bt.pack()
+
+# def ham():
+#     if run:
+#         print('hello world')
+#         sc.after(1000,ham)
+
+# sc.mainloop()
+
+global a 
+a = 8
+print(a)
